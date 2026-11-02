@@ -14,10 +14,18 @@ target_include_directories(niyu_lib
     PUBLIC include
 )
 
-add_executable(niyu
-    src/main.cpp
+add_executable(niyu src/main.cpp)
+
+target_link_libraries(niyu PRIVATE niyu_lib)
+
+enable_testing()
+
+find_package(Catch2 3 REQUIRED)
+
+add_executable(niyu_tests tests/test_main.cpp)
+
+target_link_libraries(niyu_tests
+    PRIVATE niyu_lib Catch2::Catch2WithMain
 )
 
-target_link_libraries(niyu
-    PRIVATE niyu_lib
-)
+add_test(NAME niyu_tests COMMAND niyu_tests)
