@@ -1,7 +1,7 @@
 #include "niyu/compiler.hpp"
 
 namespace niyu {
-    std::string verison() {
-        return "Niyu 0.1.0"
+    std::string version() {
+        return "Niyu 0.1.0";
     }
 }

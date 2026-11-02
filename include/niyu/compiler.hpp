@@ -1,7 +1,7 @@
-// This avoids 
-#pragma once
+    // This avoids 
+    #pragma once
 
-#include <string>
-namespace niyu {
-    std::string version()
-}
+    #include <string>
+    namespace niyu {
+        std::string version();
+    }
