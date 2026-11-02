@@ -72,6 +72,11 @@ private:
     size_t pos = 0;
     int line = 1;
     int column = 1;
+
+    bool isAtEnd();
+    char advance();
+    char peek();
+
 };
 
 }
