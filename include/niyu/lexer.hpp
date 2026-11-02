@@ -1,61 +1,77 @@
+
 #pragma once
 
 #include <string>
 #include <vector>
 
 namespace niyu {
+
+enum class TokenType {
     // Literals and identifiers
-    Identifer,
+    Identifier,
     Integer,
     Float,
-    string
-
+    String,
 
     // Keywords
-    Int,
-    Bool,
-    Void,
-    FloatType,
-    Const,
+    IntKeyword, 
+    BoolKeyword,
+    VoidKeyword,
+    FloatKeyword,
+    StringKeyword,
+    ConstKeyword,
 
-    If, Else,
-    For, While,
-    Return,
+    IfKeyword, ElseKeyword,
+    ForKeyword, WhileKeyword,
+    ReturnKeyword,
     
-    True, False,
+    TrueKeyword, FalseKeyword,
 
     // Operators
-    Plus,
-    Minus,
-    Star,
+    Plus, Minus,
+    Star, Slash,
     Percent,
-    Equal, PlusEqual,MinusEqual,StarEqual,SlashEqual,
-    Less,Greater,LessEqual,GreaterEqual,
-    PlusPlus,MinusMinus
 
-    // Braces
-    LeftParen,RightParen,
-    LeftBrace,RightBrace,
-    Semicolon,Comma
+    Equal, PlusEqual, MinusEqual,
+    StarEqual, SlashEqual,
 
-    EndofFile
-}
+    EqualEqual, Less, Greater,
+    LessEqual, GreaterEqual,
+
+    AndAnd, OrOr, Bang,
+    PlusPlus, MinusMinus,
+
+    // Braces and punctuation
+    LeftParen,
+    RightParen,
+    LeftBrace,
+    RightBrace,
+    Semicolon,
+    Comma,
+
+    // Special
+    EndOfFile
+};
 
 struct Token {
     TokenType type;
     std::string value;
-    int line,column;
-}
-
-class Lexar {
-    public:
-        explicit Lexar(const std::string& source);
-        std::vector<Token> tokenize();
-    private:
-        std::string source;
-        std::vector<Token> tokens;
-
-        size_t pos = 0;
-        int line = 1;
-        int column = 1;
+    int line;
+    int column;
 };
+
+class Lexer {
+public:
+    explicit Lexer(const std::string& source);
+    std::vector<Token> tokenize();
+
+private:
+    std::string source;
+    std::vector<Token> tokens;
+
+    size_t pos = 0;
+    int line = 1;
+    int column = 1;
+};
+
+}
