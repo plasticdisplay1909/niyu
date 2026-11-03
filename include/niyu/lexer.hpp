@@ -92,6 +92,10 @@ private:
     void scanNumber();
     void scanString();
 
+    [[noreturn]] void error(const std::string& message) const;
+    void scanOperator();
+    void scanPunctuation();
+
 };
 
 }

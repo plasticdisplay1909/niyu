@@ -158,6 +158,86 @@ namespace niyu {
         advance();
         addToken(TokenType::String,value);
     }
+
+    void Lexer::error(const std::string& message) const {
+        throw std::runtime_error( std::to_string(startLine) + ":" + std::to_string(startColumn) +" -> " + message);
+    }
+
+    void Lexer::scanOperator() {
+        startLine = line;
+        startColumn = column;
+
+        size_t start = pos;
+        char c = advance();
+        TokenType type;
+
+        switch (c) {
+            case '+':
+                type=match('+') ? TokenType::PlusPlus
+                    : match('=') ? TokenType::PlusEqual
+                    :              TokenType::Plus;
+                break;
+            case '-':
+                type = match('-') ? TokenType::MinusMinus
+                    : match('=') ? TokenType::MinusEqual
+                    :              TokenType::Minus;
+                break;
+            case '*':
+                type = match('=') ? TokenType::StarEqual : TokenType::Star;
+                break;
+            case '/':
+                type = match('=') ? TokenType::SlashEqual : TokenType::Slash;
+                break;
+            case '%':
+                type = TokenType::Percent;
+                break;
+            case '=':
+                type = match('=') ? TokenType::EqualEqual : TokenType::Equal;
+                break;
+            case '!':
+                type = match('=') ? TokenType::BangEqual : TokenType::Bang;
+                break;
+            case '<':
+                type = match('=') ? TokenType::LessEqual : TokenType::Less;
+                break;
+            case '>':
+                type = match('=') ? TokenType::GreaterEqual : TokenType::Greater;
+                break;
+            case '&':
+                if (!match('&')) error("Unexpected '&' (did you mean '&&'?)");
+                type = TokenType::AndAnd;
+                break;
+            case '|':
+                if (!match('|')) error("Unexpected '|' (did you mean '||'?)");
+                type = TokenType::OrOr;
+                break;
+            default:
+                error(std::string("Unexpected character '") + c + "'");
+        }
+
+        addToken(type, source.substr(start, pos - start));
+    }
+
+   void Lexer::scanPunctuation() {
+    startLine = line;
+    startColumn = column;
+
+    char c = advance();
+    TokenType type;
+
+    switch (c) {
+        case '(': type = TokenType::LeftParen;  break;
+        case ')': type = TokenType::RightParen; break;
+        case '{': type = TokenType::LeftBrace;  break;
+        case '}': type = TokenType::RightBrace; break;
+        case ';': type = TokenType::Semicolon;  break;
+        case ',': type = TokenType::Comma;      break;
+        default:
+            error(std::string("Unexpected character '") + c + "'");
+    }
+
+    addToken(type, std::string(1, c));
+}
 }
 
 
