@@ -1,18 +1,43 @@
 #include "niyu/lexer.hpp"
 #include <unordered_map>
+#include <stdexcept>
 
 namespace niyu {
+
+    // Build once at startup
+    namespace {
+        const std::unordered_map<std::string, TokenType> keywords = {
+            {"int", TokenType::IntKeyword},
+            {"float", TokenType::FloatKeyword},
+            {"bool", TokenType::BoolKeyword},
+            {"string", TokenType::StringKeyword},
+            {"void", TokenType::VoidKeyword},
+            {"const", TokenType::ConstKeyword},
+            {"if", TokenType::IfKeyword},
+            {"else", TokenType::ElseKeyword},
+            {"for", TokenType::ForKeyword},
+            {"while", TokenType::WhileKeyword},
+            {"return", TokenType::ReturnKeyword},
+            {"true", TokenType::TrueKeyword},
+            {"false", TokenType::FalseKeyword}
+        };
+    }
 
     Lexer::Lexer(const std::string& source)
         : source(source) {}
 
-    bool Lexer::isAtEnd() {
+    bool Lexer::isAtEnd() const{
         return pos>=source.size();
     }
 
-    char Lexer::peek() {
+    char Lexer::peek() const {
         if (isAtEnd()) return '\0';         // Null charecter
         return source[pos];
+    }
+
+    char Lexer::peekNext() const{
+        if (pos+1 >= source.size()) return '\0';
+        return source[pos+1];
     }
 
     char Lexer::advance() {
@@ -43,7 +68,7 @@ namespace niyu {
         tokens.push_back({type,value,startLine,startColumn});
     }
 
-    bool Lexer::isAlpha(char c) {
+    bool Lexer::isAlpha(char c) const {
         return (
             (c>='a' && c<='z') ||
             (c>='A' && c<='Z') ||
@@ -51,15 +76,18 @@ namespace niyu {
         );
     }
 
-    bool Lexer::isDigit(char c) {
-        return (c>='0' && c<='9');
+    bool Lexer::isDigit(char c) const {
+        return c>='0' && c<='9';
     }
 
-    bool Lexer::isAlphaNumeric(char c) {
+    bool Lexer::isAlphaNumeric(char c) const{
         return isAlpha(c) || isDigit(c);
     }
 
     void Lexer::scanIdentifier() {
+        startLine=line;
+        startColumn=column;
+
         size_t start = pos;
 
         while (!isAtEnd() && isAlphaNumeric(peek())) {
@@ -67,22 +95,6 @@ namespace niyu {
         }
 
         std::string word = source.substr(start, pos - start);
-
-        static const std::unordered_map<std::string, TokenType> keywords = {
-            {"int", TokenType::IntKeyword},
-            {"float", TokenType::FloatKeyword},
-            {"bool", TokenType::BoolKeyword},
-            {"string", TokenType::StringKeyword},
-            {"void", TokenType::VoidKeyword},
-            {"const", TokenType::ConstKeyword},
-            {"if", TokenType::IfKeyword},
-            {"else", TokenType::ElseKeyword},
-            {"for", TokenType::ForKeyword},
-            {"while", TokenType::WhileKeyword},
-            {"return", TokenType::ReturnKeyword},
-            {"true", TokenType::TrueKeyword},
-            {"false", TokenType::FalseKeyword}
-        };
 
         auto it = keywords.find(word);
 
@@ -101,13 +113,13 @@ namespace niyu {
         startColumn=column;
 
         while (!isAtEnd() && isDigit(peek())) {
-            advance();
+            advance(); 
         }
 
         if (!isAtEnd() && peek()=='.') {
-            if (pos+1 <source.size() && isDigit[source[pos+1]]) {
+            if (pos+1 <source.size() && isDigit(peekNext())) {
                 isFloat=true;
-                advance();
+                advance();          // Consume '.'
 
                 while (!isAtEnd() and isDigit(peek())) {
                     advance();
@@ -116,7 +128,35 @@ namespace niyu {
         }
 
         std::string num=source.substr(start,pos-start);
-        addToken(isFloat ? TokenType::Float : TokenType::Integer , num)
+        addToken(isFloat ? TokenType::Float : TokenType::Integer , num);
+    }
+
+    void Lexer::scanString() {
+        startLine=line;
+        startColumn=column;
+
+        // Consume opening quotes
+        advance();
+
+        size_t start=pos;
+        while (!isAtEnd() and peek()!='"') {
+            if (peek()=='\n') {
+                throw std::runtime_error(std::to_string(startLine) + ':' + std::to_string(startColumn)+" -> Unterminated String (NewLine before closing quote)");
+            }
+
+            advance();
+        }
+
+        // End is not by closing quotes
+        if (isAtEnd()) {
+            throw std::runtime_error(std::to_string(startLine) + ':' + std::to_string(startColumn)+" -> Unterminated String (Reached end of the file)");
+        }
+
+        std::string value=source.substr(start,pos-start);
+
+        // Consume closing quotes
+        advance();
+        addToken(TokenType::String,value);
     }
 }
 

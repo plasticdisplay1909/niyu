@@ -34,6 +34,7 @@ enum class TokenType {
 
     Equal, PlusEqual, MinusEqual,
     StarEqual, SlashEqual,
+    BangEqual,
 
     EqualEqual, Less, Greater,
     LessEqual, GreaterEqual,
@@ -73,21 +74,24 @@ private:
     int line = 1;
     int column = 1;
 
-    bool isAtEnd();
+    bool isAtEnd() const;
     char advance();
-    char peek();
+    char peek() const;
+    char peekNext() const;
     bool match(char expected);
 
     int startColumn=1;
     int startLine=1;
     void addToken(TokenType type, const std::string& value);
 
-    bool isAlpha(char c);
-    bool isDigit(char c);
-    bool isAlphaNumeric(char c);
+    bool isAlpha(char c) const;
+    bool isDigit(char c) const;
+    bool isAlphaNumeric(char c) const;
 
     void scanIdentifier();
     void scanNumber();
+    void scanString();
+
 };
 
 }
