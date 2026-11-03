@@ -76,7 +76,18 @@ private:
     bool isAtEnd();
     char advance();
     char peek();
+    bool match(char expected);
 
+    int startColumn=1;
+    int startLine=1;
+    void addToken(TokenType type, const std::string& value);
+
+    bool isAlpha(char c);
+    bool isDigit(char c);
+    bool isAlphaNumeric(char c);
+
+    void scanIdentifier();
+    void scanNumber();
 };
 
 }
